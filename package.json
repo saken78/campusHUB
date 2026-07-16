@@ -1,11 +1,22 @@
 {
   "name": "Bun-campusHub",
+  "type": "module",
   "scripts": {
-    "sh": "bun run --hot src/index.ts"
+    "start": "tsc --noemit && bun run --watch src/index.ts",
+    "sh": "tsc --noemit && bun run --watch src/index.ts",
+    "check": "tsc --noEmit",
+    "pull": "bunx --bun prisma db pull",
+    "push": "bunx --bun prisma db push",
+    "generate": "bunx --bun prisma generate",
+    "test": "bun test --env-file=.env.test"
   },
   "dependencies": {
+    "@prisma/adapter-mariadb": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "dotenv": "^17.4.2",
     "hono": "^4.12.30",
     "hono-rate-limiter": "^0.5.3",
+    "prisma": "^7.8.0",
     "winston": "^3.19.0",
     "zod": "^4.4.3"
   },

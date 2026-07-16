@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum EventStatus {
+  draft
+  published
+  archived
+  cancelled
+}
+
+enum UsersRole {
+  superadmin
+  admin
+  dosen
+  mahasiswa
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      UsersRole @default(mahasiswa)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  bookmarks     Bookmark[]
+  comments      Comment[]
+  createdEvents Event[]    @relation("EventCreator")
+
+  @@map("users")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique
+  color       String?
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  events EventCategory[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id     Int        @id @default(autoincrement())
+  name   String
+  slug   String     @unique
+  events EventTag[]
+
+  @@map("tags")
+}
+
+model Event {
+  id               Int         @id @default(autoincrement())
+  title            String
+  slug             String      @unique
+  description      String      @db.Text
+  excerpt          String?
+  poster           String?
+  startDate        DateTime    @map("start_date")
+  endDate          DateTime?   @map("end_date")
+  deadline         DateTime?
+  location         String?
+  organizer        String?
+  contact          String?
+  registrationLink String?     @map("registration_link")
+  status           EventStatus @default(draft)
+  featured         Boolean     @default(false)
+  views            Int         @default(0)
+  createdBy        Int?        @map("created_by")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+  deletedAt        DateTime?   @map("deleted_at")
+
+  categories  EventCategory[]
+  tags        EventTag[]
+  attachments Attachment[]
+  comments    Comment[]
+  bookmarks   Bookmark[]
+  creator     User?           @relation("EventCreator", fields: [createdBy], references: [id], onDelete: SetNull)
+
+  @@index([status, startDate])
+  @@index([deletedAt])
+  @@map("events")
+}
+
+model EventCategory {
+  id         Int      @id @default(autoincrement())
+  eventId    Int      @map("event_id")
+  categoryId Int      @map("category_id")
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, categoryId])
+  @@map("event_category")
+}
+
+model EventTag {
+  id      Int   @id @default(autoincrement())
+  eventId Int   @map("event_id")
+  tagId   Int   @map("tag_id")
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, tagId])
+  @@map("event_tag")
+}
+
+model Attachment {
+  id       Int     @id @default(autoincrement())
+  eventId  Int     @map("event_id")
+  name     String
+  path     String
+  mimeType String? @map("mime_type")
+  size     Int?
+  event    Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@map("attachments")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  eventId   Int      @map("event_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@map("bookmarks")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  eventId   Int      @map("event_id")
+  userId    Int      @map("user_id")
+  parentId  Int?     @map("parent_id")
+  body      String   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  event   Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentThread")
+
+  @@index([eventId])
+  @@map("comments")
+}
