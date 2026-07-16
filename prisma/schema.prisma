@@ -40,7 +40,6 @@ model User {
 model Category {
   id          Int      @id @default(autoincrement())
   name        String
-  slug        String   @unique
   color       String?
   description String?
   createdAt   DateTime @default(now()) @map("created_at")
@@ -54,7 +53,6 @@ model Category {
 model Tag {
   id     Int        @id @default(autoincrement())
   name   String
-  slug   String     @unique
   events EventTag[]
 
   @@map("tags")
@@ -63,7 +61,6 @@ model Tag {
 model Event {
   id               Int         @id @default(autoincrement())
   title            String
-  slug             String      @unique
   description      String      @db.Text
   excerpt          String?
   poster           String?

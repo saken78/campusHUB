@@ -11,7 +11,7 @@ import {
 import { HttpStatus } from "../utils/status_code";
 import { prisma } from "../db";
 import { JwtHelper } from "../lib/jwt";
-import { setSignedCookie } from "hono/cookie";
+import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie";
 import { SECRET } from "../lib/secret";
 import type { Context } from "hono";
 
@@ -78,5 +78,15 @@ export const AuthService = {
   async me(c: Context): Promise<JwtResponse> {
     const user = c.get("user");
     return user;
+  },
+  async logout(c: Context): Promise<void> {
+    const access_token = await getSignedCookie(c, SECRET, "access_token");
+    if (!access_token) {
+      throw new HTTPException(HttpStatus.UNAUTHORIZED, {
+        message: "Cookie Already Cleared",
+      });
+    }
+
+    deleteCookie(c, "access_token");
   },
 };

@@ -35,5 +35,14 @@ AuthController.get("/me", async (c: Context) => {
     HttpStatus.OK,
   );
 });
+AuthController.delete("/logout", async (c: Context) => {
+  await AuthService.logout(c);
+  return c.json(
+    {
+      data: "Cookies cleared successfully",
+    },
+    HttpStatus.OK,
+  );
+});
 
 export default AuthController;
