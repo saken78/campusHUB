@@ -63,7 +63,7 @@ export const AuthService = {
       role: user.role,
     });
 
-    await setSignedCookie(c, token, "access_token", SECRET, {
+    await setSignedCookie(c, "access_token", token, SECRET, {
       httpOnly: true,
     });
 

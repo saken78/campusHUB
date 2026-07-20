@@ -7,8 +7,7 @@
     "check": "tsc --noEmit",
     "pull": "bunx --bun prisma db pull",
     "push": "bunx --bun prisma db push",
-    "generate": "bunx --bun prisma generate",
-    "test": "bun test --env-file=.env.test"
+    "generate": "bunx --bun prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",

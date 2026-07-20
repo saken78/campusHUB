@@ -16,7 +16,7 @@ export type RegisterUserRequest = z.infer<typeof REGISTER_USER_SCHEMA>;
 export type LoginUserRequest = z.infer<typeof LOGIN_USER_SCHEMA>;
 
 export type AuthResponse = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: string;
@@ -24,7 +24,7 @@ export type AuthResponse = {
 };
 
 export type JwtResponse = {
-  id: number;
+  id: string;
   email: string;
   role: string;
 };

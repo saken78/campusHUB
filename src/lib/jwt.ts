@@ -2,7 +2,7 @@ import { sign, verify } from "hono/jwt";
 import { SECRET } from "./secret";
 
 export type JwtPayload = {
-  sub?: number;
+  sub?: string;
   role?: string;
   email?: string;
   aud?: string | string[];
