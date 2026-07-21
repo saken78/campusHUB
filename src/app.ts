@@ -5,6 +5,7 @@ import { winstonlogger } from "./utils/winston-logger";
 import { rateLimiter } from "hono-rate-limiter";
 import GlobalError from "./utils/error-handling";
 import AuthController from "./auth/auth.controller";
+import EventController from "./events/event.controller";
 
 const app = new Hono();
 
@@ -25,7 +26,10 @@ const limiter = rateLimiter({
 
 app.use("/*", logger());
 app.use("/api/auth", limiter);
-app.basePath("/api").route("/auth", AuthController);
+app
+  .basePath("/api")
+  .route("/auth", AuthController)
+  .route("/events", EventController);
 app.onError(GlobalError);
 
 for (let i = 0; i < app.routes.length; i++) {
