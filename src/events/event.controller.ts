@@ -39,7 +39,7 @@ EventController.get("/", async (c: Context) => {
   const result = await EventService.list(page, perPage);
   return c.json(result, HttpStatus.OK);
 });
-EventController.use(requireRole("admin", "superadmin", "dosen"));
+EventController.use(requireRole("admin", "dosen"));
 EventController.post("/", async (c: Context) => {
   const user: JwtResponse = c.get("user");
   const body = await c.req.json();
