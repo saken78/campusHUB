@@ -7,5 +7,6 @@ declare module "bun" {
     DATABASE_PASSWORD: string;
     DATABASE_NAME: string;
     JWT_SECRET: string;
+    CORS_ORIGIN_DEV: string;
   }
 }

@@ -1,5 +1,5 @@
 import { Context, Hono, type Env, type Input } from "hono";
-// import { cors } from "hono/cors";
+import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { winstonlogger } from "./utils/winston-logger";
 import { rateLimiter } from "hono-rate-limiter";
@@ -16,13 +16,13 @@ const limiter = rateLimiter({
     c.req.header("x-forwarded-for") || "unknown",
 });
 
-// app.use(
-//   "/*",
-//   cors({
-//     origin: Bun.env.CORS_ORIGIN_DEV,
-//     credentials: true,
-//   }),
-// );
+app.use(
+  "/*",
+  cors({
+    origin: Bun.env.CORS_ORIGIN_DEV,
+    credentials: true,
+  }),
+);
 
 app.use("/*", logger());
 app.use("/api/auth", limiter);
