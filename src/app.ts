@@ -6,6 +6,7 @@ import { rateLimiter } from "hono-rate-limiter";
 import GlobalError from "./utils/error-handling";
 import AuthController from "./auth/auth.controller";
 import EventController from "./events/event.controller";
+import UserController from "./users/user.controller";
 
 const app = new Hono();
 
@@ -29,6 +30,7 @@ app.use("/api/auth", limiter);
 app
   .basePath("/api")
   .route("/auth", AuthController)
+  .route("/users", UserController)
   .route("/events", EventController);
 app.onError(GlobalError);
 

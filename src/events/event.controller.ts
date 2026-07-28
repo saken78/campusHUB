@@ -8,21 +8,6 @@ import { HTTPException } from "hono/http-exception";
 
 const EventController = new Hono();
 EventController.use(AuthMiddleware);
-EventController.get("/:id", async (c: Context) => {
-  const id = c.req.param("id");
-  if (!id) {
-    throw new HTTPException(HttpStatus.BAD_REQUEST, {
-      message: "Param undefined",
-    });
-  }
-  const result = await EventService.findById(id);
-  return c.json(
-    {
-      data: result,
-    },
-    HttpStatus.OK,
-  );
-});
 EventController.get("/", async (c: Context) => {
   const page = c.req.query("page");
   const perPage = c.req.query("perPage");
@@ -39,6 +24,21 @@ EventController.get("/", async (c: Context) => {
   const result = await EventService.list(page, perPage);
   return c.json(result, HttpStatus.OK);
 });
+EventController.get("/:id", async (c: Context) => {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new HTTPException(HttpStatus.BAD_REQUEST, {
+      message: "Param undefined",
+    });
+  }
+  const result = await EventService.findById(id);
+  return c.json(
+    {
+      data: result,
+    },
+    HttpStatus.OK,
+  );
+});
 EventController.use(requireRole("admin", "dosen"));
 EventController.post("/", async (c: Context) => {
   const user: JwtResponse = c.get("user");
@@ -49,6 +49,21 @@ EventController.post("/", async (c: Context) => {
       data: result,
     },
     HttpStatus.CREATED,
+  );
+});
+EventController.get("/me/:id", async (c: Context) => {
+  const id = c.req.param("id");
+  if (!id) {
+    throw new HTTPException(HttpStatus.BAD_REQUEST, {
+      message: "undefined param",
+    });
+  }
+  const data = await EventService.findByMe(id);
+  return c.json(
+    {
+      data: data,
+    },
+    HttpStatus.OK,
   );
 });
 EventController.put("/:id", async (c: Context) => {

@@ -115,6 +115,14 @@ export const EventService = {
 
     return event;
   },
+  async findByMe(id: string) {
+    const data = await prisma.event.findMany({
+      where: {
+        createdBy: id,
+      },
+    });
+    return data;
+  },
   async update(
     id: string,
     req: UpdateEventRequest,
