@@ -21,7 +21,7 @@ EventController.get("/", async (c: Context) => {
       message: "query perpage undefined",
     });
   }
-  const result = await EventService.list(page, perPage);
+  const result = await EventService.findAll(page, perPage);
   return c.json(result, HttpStatus.OK);
 });
 EventController.get("/:id", async (c: Context) => {

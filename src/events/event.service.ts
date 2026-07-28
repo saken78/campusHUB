@@ -7,12 +7,18 @@ import {
   CREATE_EVENT_SCHEMA,
   UPDATE_EVENT_SCHEMA,
   type CreateEventRequest,
+  type EventMetaResponse,
+  type EventResponse,
+  type EventWithRelations,
   type UpdateEventRequest,
 } from "./event.model";
 import { findOwned, withRelations } from "./event.helper";
 
 export const EventService = {
-  async create(req: CreateEventRequest, userId: string) {
+  async create(
+    req: CreateEventRequest,
+    userId: string,
+  ): Promise<EventWithRelations | null> {
     const data = CREATE_EVENT_SCHEMA.parse(req);
 
     if (data.endDate && data.startDate >= data.endDate) {
@@ -41,7 +47,7 @@ export const EventService = {
 
       if (data.categoryIds?.length) {
         await tx.eventCategory.createMany({
-          data: data.categoryIds.map((categoryId) => ({
+          data: data.categoryIds.map((categoryId: string) => ({
             eventId: event.id,
             categoryId,
           })),
@@ -50,7 +56,10 @@ export const EventService = {
 
       if (data.tagIds?.length) {
         await tx.eventTag.createMany({
-          data: data.tagIds.map((tagId) => ({ eventId: event.id, tagId })),
+          data: data.tagIds.map((tagId: string) => ({
+            eventId: event.id,
+            tagId,
+          })),
         });
       }
 
@@ -60,7 +69,7 @@ export const EventService = {
       });
     });
   },
-  async list(page: string, perPage: string) {
+  async findAll(page: string, perPage: string): Promise<EventMetaResponse> {
     const pg = paginate(page, perPage);
 
     const [data, total] = await prisma.$transaction([
@@ -87,7 +96,7 @@ export const EventService = {
       meta: buildMeta(total, pg.page, pg.perPage),
     };
   },
-  async findById(id: string) {
+  async findById(id: string): Promise<EventWithRelations> {
     const event = await prisma.event.findFirst({
       where: {
         id,
@@ -115,7 +124,7 @@ export const EventService = {
 
     return event;
   },
-  async findByMe(id: string) {
+  async findByMe(id: string): Promise<EventResponse[]> {
     const data = await prisma.event.findMany({
       where: {
         createdBy: id,
@@ -209,7 +218,7 @@ export const EventService = {
     status: EventStatus,
     userId: string,
     role: string,
-  ) {
+  ): Promise<EventResponse> {
     await findOwned(id, userId, role);
     return prisma.event.update({
       where: {
