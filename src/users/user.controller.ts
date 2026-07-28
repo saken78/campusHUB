@@ -38,9 +38,12 @@ UserController.delete("/:id", async (c: Context) => {
     });
   }
   await UserService.deleteUser(id);
-  return c.json({
-    data: "User deleted succes",
-  });
+  return c.json(
+    {
+      data: "User deleted succes",
+    },
+    HttpStatus.OK,
+  );
 });
 
 export default UserController;

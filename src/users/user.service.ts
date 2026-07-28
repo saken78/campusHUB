@@ -2,13 +2,23 @@ import { HTTPException } from "hono/http-exception";
 import { prisma } from "../db";
 import { HttpStatus } from "../utils/status_code";
 import type { users_role } from "../../generated/prisma/enums";
+import type { UserResponse } from "./user.model";
 
 export const UserService = {
-  async getUsers() {
-    const data = await prisma.user.findMany();
+  async getUsers(): Promise<UserResponse[]> {
+    const data = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
     return data;
   },
-  async changeRole(id: string, role: users_role) {
+  async changeRole(id: string, role: users_role): Promise<UserResponse> {
     const data = await prisma.user.update({
       where: {
         id: id,
@@ -16,10 +26,18 @@ export const UserService = {
       data: {
         role: role,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     return data;
   },
-  async deleteUser(id: string) {
+  async deleteUser(id: string): Promise<void> {
     await prisma.user.delete({
       where: {
         id: id,
