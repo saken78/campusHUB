@@ -2,6 +2,7 @@ import { Context, Hono } from "hono";
 import { UserService } from "./user.service";
 import { HttpStatus } from "../utils/status_code";
 import { HTTPException } from "hono/http-exception";
+import type { UserPatchRoleRequest } from "./user.model";
 
 const UserController = new Hono();
 UserController.get("/", async (c: Context) => {
@@ -20,7 +21,8 @@ UserController.patch("/:id", async (c: Context) => {
       message: "param undefined",
     });
   }
-  const data = await UserService.changeRole(id);
+  const body: UserPatchRoleRequest = await c.req.json();
+  const data = await UserService.changeRole(id, body.role);
   return c.json(
     {
       data: data,

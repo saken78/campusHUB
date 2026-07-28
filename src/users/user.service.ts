@@ -1,19 +1,20 @@
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "../db";
 import { HttpStatus } from "../utils/status_code";
+import type { users_role } from "../../generated/prisma/enums";
 
 export const UserService = {
   async getUsers() {
     const data = await prisma.user.findMany();
     return data;
   },
-  async changeRole(id: string) {
+  async changeRole(id: string, role: users_role) {
     const data = await prisma.user.update({
       where: {
         id: id,
       },
       data: {
-        role: "dosen",
+        role: role,
       },
     });
     return data;
