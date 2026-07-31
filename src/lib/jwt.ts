@@ -14,11 +14,7 @@ export type JwtPayload = {
 
 export const JwtHelper = {
   async signToken(payload: JwtPayload): Promise<string> {
-    return await sign(
-      { ...payload, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7 },
-      SECRET,
-      "HS256",
-    );
+    return await sign({ ...payload }, SECRET, "HS256");
   },
   async verifyToken(token: string) {
     return verify(token, SECRET, "HS256");

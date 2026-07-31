@@ -7,6 +7,8 @@ import {
   type JwtResponse,
   type LoginUserRequest,
   type RegisterUserRequest,
+  type VerifyRecoveryResponse,
+  type RecoveryTokenPayload,
 } from "./auth.model";
 import { HttpStatus } from "../utils/status_code";
 import { prisma } from "../db";
@@ -61,6 +63,7 @@ export const AuthService = {
       sub: user.id,
       email: user.email,
       role: user.role,
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7,
     });
 
     await setSignedCookie(c, "access_token", token, SECRET, {
@@ -119,6 +122,61 @@ export const AuthService = {
 
     await setSignedCookie(c, "access_token", token, SECRET, {
       httpOnly: true,
+    });
+  },
+  async verifyRecovery(
+    email: string,
+    name: string,
+  ): Promise<VerifyRecoveryResponse> {
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    if (!user || user.name !== name) {
+      throw new HTTPException(HttpStatus.BAD_REQUEST, {
+        message: "Email atau nama tidak cocok",
+      });
+    }
+    const token = await JwtHelper.signToken({
+      sub: user.id,
+      email: user.email,
+      role: "recovery",
+      exp: Math.floor(Date.now() / 1000) + 60 * 5,
+    });
+    return {
+      token,
+    };
+  },
+  async resetRecovery(token: string, password: string): Promise<void> {
+    let payload: RecoveryTokenPayload;
+    try {
+      payload = (await JwtHelper.verifyToken(token)) as RecoveryTokenPayload;
+    } catch {
+      throw new HTTPException(HttpStatus.UNAUTHORIZED, {
+        message: "Token tidak valid atau sudah expired",
+      });
+    }
+
+    if (payload.type !== "recovery") {
+      throw new HTTPException(HttpStatus.UNAUTHORIZED, {
+        message: "Token tidak valid",
+      });
+    }
+
+    const npw = await Bun.password.hash(password, {
+      algorithm: "argon2id",
+      memoryCost: 4,
+      timeCost: 3,
+    });
+
+    await prisma.user.update({
+      where: {
+        email: payload.email,
+      },
+      data: {
+        password: npw,
+      },
     });
   },
   async resetPassword(password: string, email: string): Promise<void> {
