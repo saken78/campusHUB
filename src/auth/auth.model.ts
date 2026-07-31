@@ -11,9 +11,21 @@ export const LOGIN_USER_SCHEMA = z.object({
   password: z.string().min(1),
 });
 
+export const CHANGE_USERNAME_SCHEMA = z.object({
+  name: z.string().min(3),
+});
+
+export const RESET_PASSWORD_SCHEMA = z.object({
+  password: z.string().min(8).max(100),
+});
+
 export type RegisterUserRequest = z.infer<typeof REGISTER_USER_SCHEMA>;
 
 export type LoginUserRequest = z.infer<typeof LOGIN_USER_SCHEMA>;
+
+export type ChangeNameRequest = z.infer<typeof CHANGE_USERNAME_SCHEMA>;
+
+export type ResetPasswordRequest = z.infer<typeof RESET_PASSWORD_SCHEMA>;
 
 export type AuthResponse = {
   id: string;

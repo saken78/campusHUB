@@ -76,8 +76,62 @@ export const AuthService = {
     };
   },
   async me(c: Context): Promise<JwtResponse> {
-    const user = c.get("user");
-    return user;
+    const user: JwtResponse = c.get("user");
+    const data = await prisma.user.findUnique({
+      where: {
+        email: user.email,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        name: true,
+      },
+    });
+    if (!data) {
+      throw new HTTPException(HttpStatus.NOT_FOUND, {
+        message: "Account not found",
+      });
+    }
+    return data;
+  },
+  async changeName(name: string, email: string, c: Context): Promise<void> {
+    const user = await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        name: name,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        name: true,
+      },
+    });
+
+    const token = await JwtHelper.signToken({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    await setSignedCookie(c, "access_token", token, SECRET, {
+      httpOnly: true,
+    });
+  },
+  async resetPassword(password: string, email: string): Promise<void> {
+    const npw = await Bun.password.hash(password, {
+      algorithm: "argon2id",
+      memoryCost: 4,
+      timeCost: 3,
+    });
+
+    await prisma.user.update({
+      where: { email: email },
+      data: { password: npw },
+    });
   },
   async logout(c: Context): Promise<void> {
     const access_token = await getSignedCookie(c, SECRET, "access_token");
